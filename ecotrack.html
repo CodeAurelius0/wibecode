@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoTrack – Student Carbon Awareness</title>
+  <meta name="description" content="A simple, student-friendly way to track daily carbon footprint, monitor eco-friendly habits, and receive actionable insights to reduce environmental impact.">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #141a1f;
+      --bg-card: #1a2128;
+      --bg-secondary: #232b34;
+      --text-primary: #e8f3ea;
+      --text-muted: #8b9a9f;
+      --primary: #3fb464;
+      --primary-dark: #34955c;
+      --border: #2d3741;
+      --red: #e74c3c;
+      --yellow: #f39c12;
+      --green: #3fb464;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* Scroll Progress Bar */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--primary);
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.15s;
+    }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .logo-circle {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--bg-dark);
+      animation: glow 2s infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(63, 180, 100, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(63, 180, 100, 0.5); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    h1 {
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: var(--bg-dark);
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    .error-message {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--red);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .small-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-top: 20px;
+    }
+
+    /* App Screen */
+    #app-screen {
+      display: none;
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(26, 33, 40, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--bg-dark);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
+    .demo-badge {
+      background: rgba(63, 180, 100, 0.2);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-size: 40px;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Hero Section */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: rgba(63, 180, 100, 0.2);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 56px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero-text {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg-dark);
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-primary);
+      padding: 14px 28px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-secondary);
+    }
+
+    .meta-text {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .meta-text p {
+      margin: 6px 0;
+    }
+
+    /* Score Widget */
+    .score-widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .widget-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .gauge-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .gauge {
+      position: relative;
+      width: 192px;
+      height: 192px;
+    }
+
+    .gauge-score {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .gauge-number {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .gauge-total {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .impact-badge {
+      margin-top: 16px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .impact-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 12px;
+      max-width: 320px;
+    }
+
+    .slider-group {
+      margin-top: 24px;
+    }
+
+    .slider-label {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+    }
+
+    /* Daily Actions Section */
+    #daily-actions {
+      background: rgba(35, 43, 52, 0.3);
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 32px;
+    }
+
+    .habit-group {
+      margin-bottom: 32px;
+    }
+
+    .habit-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .chip:hover {
+      border-color: rgba(63, 180, 100, 0.5);
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: var(--bg-dark);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(63, 180, 100, 0.3);
+    }
+
+    .breakdown-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .breakdown-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .breakdown-subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .breakdown-label {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .breakdown-value {
+      font-weight: bold;
+    }
+
+    .score-badge {
+      background: rgba(63, 180, 100, 0.2);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-block;
+      margin: 16px 0;
+    }
+
+    /* Insights Section */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .insight-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    .focus-badge {
+      background: rgba(63, 180, 100, 0.2);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+
+    .insight-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .insight-list {
+      list-style: none;
+      margin-bottom: 20px;
+    }
+
+    .insight-list li {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .insight-bullet {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .highlight-box {
+      background: rgba(63, 180, 100, 0.1);
+      border: 1px solid rgba(63, 180, 100, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .highlight-box p {
+      color: var(--primary);
+      font-size: 13px;
+    }
+
+    /* Environmental Facts Section */
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .fact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: transform 0.2s;
+    }
+
+    .fact-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .fact-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+
+    .fact-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .fact-text {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Badges Section */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .badge-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.2s;
+    }
+
+    .badge-card:hover {
+      border-color: rgba(63, 180, 100, 0.5);
+    }
+
+    .badge-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .badge-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .badge-description {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+
+    .footer-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-grid,
+      .actions-grid,
+      .insights-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-title {
+        font-size: 36px;
+      }
+
+      .section-title {
+        font-size: 32px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-ghost {
+        width: 100%;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="logo-circle">E</div>
+      <h1>EcoTrack</h1>
+      <p class="subtitle">A simple, student-friendly way to see how your daily choices impact the planet.</p>
+      
+      <form id="login-form">
+        <div class="input-group">
+          <input type="email" id="email" placeholder="student@example.com">
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" placeholder="••••••••">
+        </div>
+        
+        <div id="error-message" class="error-message hidden"></div>
+        
+        <button type="submit" id="login-btn">Enter your Eco dashboard →</button>
+      </form>
+      
+      <p class="small-text">Demo login only – made for students and beginners. No real data is stored.</p>
+    </div>
+  </div>
+
+  <!-- App Screen -->
+  <div id="app-screen">
+    <!-- Navigation -->
+    <nav>
+      <div class="nav-container">
+        <div class="nav-brand">
+          <div class="nav-logo">E</div>
+          <span style="font-size: 18px; font-weight: bold;">EcoTrack</span>
+        </div>
+        <div class="nav-links">
+          <a class="nav-link" data-scroll="overview">Overview</a>
+          <a class="nav-link" data-scroll="daily-actions">Daily actions</a>
+          <a class="nav-link" data-scroll="insights">Insights</a>
+          <a class="nav-link" data-scroll="environment">Environment</a>
+          <a class="nav-link" data-scroll="badges">Habits & badges</a>
+        </div>
+        <div class="demo-badge">Student demo</div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="overview" class="container">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">For students & beginners</span>
+          <h2 class="hero-title">See how your daily actions shape the planet.</h2>
+          <p class="hero-text">
+            EcoTrack turns simple things—how you travel, eat, use electricity, and handle waste—into a clear carbon score so students can finally understand the impact of everyday choices without complex graphs or formulas.
+          </p>
+          
+          <div class="button-group">
+            <button class="btn-primary" data-scroll="daily-actions">Log today's actions</button>
+            <button class="btn-ghost" id="try-low-impact">▶ Try a low-impact day</button>
+          </div>
+          
+          <div class="meta-text">
+            <p>• Built for classrooms – simple enough for first-time users</p>
+            <p>• 3 clear steps – Log · Understand · Improve</p>
+          </div>
+        </div>
+        
+        <div class="score-widget">
+          <p class="widget-label">Today's carbon footprint (demo)</p>
+          
+          <div class="gauge-container">
+            <div class="gauge">
+              <svg width="192" height="192" style="transform: rotate(-90deg);">
+                <circle cx="96" cy="96" r="70" stroke="#232b34" stroke-width="12" fill="none"/>
+                <circle id="gauge-circle" cx="96" cy="96" r="70" stroke="#3fb464" stroke-width="12" fill="none"
+                        stroke-dasharray="440" stroke-dashoffset="242" stroke-linecap="round"
+                        style="transition: all 0.5s;"/>
+              </svg>
+              <div class="gauge-score">
+                <div class="gauge-number" id="score-number">45</div>
+                <div class="gauge-total">/ 100</div>
+              </div>
+            </div>
+            
+            <div class="impact-badge" id="impact-badge">Moderate impact</div>
+            <p class="impact-text" id="impact-text">
+              You're on the right track. Small changes in transport, food, or energy use can make a big difference.
+            </p>
+          </div>
+          
+          <div class="slider-group">
+            <label class="slider-label">Adjust score (demo)</label>
+            <input type="range" id="score-slider" min="0" max="100" value="45">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Daily Actions Section -->
+    <section id="daily-actions">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Log today's actions</h2>
+          <p class="section-subtitle">
+            Choose simple options for each category. EcoTrack turns your everyday choices into a clear carbon score that helps you understand your environmental impact.
+          </p>
+        </div>
+        
+        <div class="actions-grid">
+          <div>
+            <div class="habit-group">
+              <h3 class="habit-title">How did you travel today?</h3>
+              <div class="chip-container" data-category="transport">
+                <div class="chip" data-weight="10">Car (solo)</div>
+                <div class="chip" data-weight="7">Car (shared)</div>
+                <div class="chip" data-weight="3">Bike / scooter</div>
+                <div class="chip" data-weight="4">Bus / metro</div>
+                <div class="chip" data-weight="1">Walk / cycle</div>
+              </div>
+            </div>
+            
+            <div class="habit-group">
+              <h3 class="habit-title">What did you mostly eat?</h3>
+              <div class="chip-container" data-category="food">
+                <div class="chip" data-weight="10">Lots of meat</div>
+                <div class="chip" data-weight="6">Mixed (veg + non-veg)</div>
+                <div class="chip" data-weight="3">Mostly veg</div>
+                <div class="chip" data-weight="1">Fully plant-based</div>
+              </div>
+            </div>
+            
+            <div class="habit-group">
+              <h3 class="habit-title">Home electricity use</h3>
+              <div class="chip-container" data-category="energy">
+                <div class="chip" data-weight="10">AC almost all day</div>
+                <div class="chip" data-weight="6">AC sometimes / normal use</div>
+                <div class="chip" data-weight="2">Fans, lights only / low use</div>
+              </div>
+            </div>
+            
+            <div class="habit-group">
+              <h3 class="habit-title">Waste & recycling</h3>
+              <div class="chip-container" data-category="waste">
+                <div class="chip" data-weight="8">Everything in one bin</div>
+                <div class="chip" data-weight="5">Sometimes separated</div>
+                <div class="chip" data-weight="2">Regularly sort & recycle</div>
+              </div>
+            </div>
+            
+            <button class="btn-primary" id="calculate-score" style="width: 100%; margin-top: 16px;">
+              See today's carbon score
+            </button>
+          </div>
+          
+          <div class="breakdown-card">
+            <h3 class="breakdown-title">Where your impact comes from</h3>
+            <p class="breakdown-subtitle">
+              Simple breakdown so students can see which habit matters most today.
+            </p>
+            
+            <div class="breakdown-item">
+              <span class="breakdown-label">Transport</span>
+              <span class="breakdown-value" id="breakdown-transport">0/10</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Food</span>
+              <span class="breakdown-value" id="breakdown-food">0/10</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Home energy</span>
+              <span class="breakdown-value" id="breakdown-energy">0/10</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Waste</span>
+              <span class="breakdown-value" id="breakdown-waste">0/10</span>
+            </div>
+            
+            <div class="score-badge" id="total-badge">Total: 0/40</div>
+            
+            <button class="btn-ghost" data-scroll="insights" style="width: 100%;">
+              View simple suggestions ↓
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insights Section -->
+    <section id="insights" class="container">
+      <div class="section-header">
+        <h2 class="section-title">Easy, actionable insights</h2>
+        <p class="section-subtitle">
+          No complex charts or jargon—just clear, beginner-friendly tips to help students understand and improve their environmental impact.
+        </p>
+      </div>
+      
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="focus-badge" id="focus-area">Focus: transport</div>
+          <h3 class="insight-title">What's driving your impact today?</h3>
+          <ul class="insight-list" id="insight-points">
+            <li>
+              <span class="insight-bullet">•</span>
+              <span>Solo car trips add up fast—even short ones create more emissions than you'd think.</span>
+            </li>
+            <li>
+              <span class="insight-bullet">•</span>
+              <span>Walking, cycling, or taking public transit significantly reduces your carbon footprint.</span>
+            </li>
+            <li>
+              <span class="insight-bullet">•</span>
+              <span>Try replacing just two car trips this week with walking or the bus to see the difference.</span>
+            </li>
+          </ul>
+          <button class="btn-ghost" id="shuffle-insights">↻ Show another simple tip</button>
+        </div>
+        
+        <div class="insight-card">
+          <div class="focus-badge">Quick "what if?" scenario</div>
+          <h3 class="insight-title">If you changed just one habit…</h3>
+          <p class="fact-text" id="scenario-text">
+            If you replaced two short solo car trips this week with walking or cycling, your demo score could move closer to the 'low impact' band. Small changes add up over the semester.
+          </p>
+          <div class="highlight-box" id="highest-impact-hint" style="display: none;">
+            <p id="highest-impact-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Environmental Facts Section -->
+    <section id="environment" style="background: rgba(35, 43, 52, 0.3);">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Understanding Your Environmental Impact</h2>
+          <p class="section-subtitle">
+            Learn the science behind everyday choices and why they matter for our planet's future.
+          </p>
+        </div>
+        
+        <div class="facts-grid">
+          <div class="fact-card">
+            <div class="fact-icon">🚗</div>
+            <h3 class="fact-title">Transportation & Carbon</h3>
+            <p class="fact-text">
+              A single car trip emits about 404g of CO₂ per mile. Walking or cycling the same distance produces zero direct emissions. Public transport reduces individual carbon footprint by up to 45% compared to driving alone.
+            </p>
+          </div>
+          
+          <div class="fact-card">
+            <div class="fact-icon">🍔</div>
+            <h3 class="fact-title">Food Production Impact</h3>
+            <p class="fact-text">
+              Producing 1kg of beef generates 60kg of greenhouse gases—21 times more than vegetables. Livestock farming uses 77% of agricultural land but provides only 18% of calories. Plant-based meals can cut food-related emissions by 73%.
+            </p>
+          </div>
+          
+          <div class="fact-card">
+            <div class="fact-icon">⚡</div>
+            <h3 class="fact-title">Energy Consumption</h3>
+            <p class="fact-text">
+              Air conditioning accounts for 10% of global electricity use. A typical AC unit emits 1.6kg of CO₂ per hour. Using fans instead can reduce home cooling emissions by 90%. LED bulbs use 75% less energy than incandescent ones.
+            </p>
+          </div>
+          
+          <div class="fact-card">
+            <div class="fact-icon">♻️</div>
+            <h3 class="fact-title">Waste & Recycling</h3>
+            <p class="fact-text">
+              Landfills produce 15% of global methane emissions—a gas 25x more potent than CO₂. Recycling one ton of paper saves 17 trees and 7,000 gallons of water. Proper waste sorting prevents 2.5 tons of CO₂ per person annually.
+            </p>
+          </div>
+          
+          <div class="fact-card">
+            <div class="fact-icon">🌍</div>
+            <h3 class="fact-title">Climate Change Reality</h3>
+            <p class="fact-text">
+              Global temperatures have risen 1.1°C since pre-industrial times. We need to limit warming to 1.5°C to avoid catastrophic effects. Every 0.5°C matters—it affects billions of lives, ecosystems, and weather patterns worldwide.
+            </p>
+          </div>
+          
+          <div class="fact-card">
+            <div class="fact-icon">🎯</div>
+            <h3 class="fact-title">Your Individual Power</h3>
+            <p class="fact-text">
+              If 1 million students reduced carbon footprints by 2 tons/year, it equals removing 430,000 cars from roads. Small individual actions create massive collective impact. Youth action drives 60% of climate policy changes globally.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Badges Section -->
+    <section id="badges" class="container">
+      <div class="section-header">
+        <h2 class="section-title">Habit streaks & badges</h2>
+        <p class="section-subtitle">
+          Motivate yourself with positive reinforcement, not shame. Celebrate your progress and build sustainable habits over time.
+        </p>
+      </div>
+      
+      <div class="badges-grid">
+        <div class="badge-card">
+          <div class="badge-icon">🌱</div>
+          <h3 class="badge-title">Eco Starter</h3>
+          <p class="badge-description">Logged your impact on 3 different days</p>
+        </div>
+        
+        <div class="badge-card">
+          <div class="badge-icon">🚴</div>
+          <h3 class="badge-title">Green Rider</h3>
+          <p class="badge-description">Chose low-carbon transport for 5 days in a row</p>
+        </div>
+        
+        <div class="badge-card">
+          <div class="badge-icon">🥗</div>
+          <h3 class="badge-title">Plant-Powered</h3>
+          <p class="badge-description">Recorded mostly plant-based meals this week</p>
+        </div>
+        
+        <div class="badge-card">
+          <div class="badge-icon">💡</div>
+          <h3 class="badge-title">Energy Saver</h3>
+          <p class="badge-description">Kept electricity use in the low band for 4 days</p>
+        </div>
+        
+        <div class="badge-card">
+          <div class="badge-icon">♻️</div>
+          <h3 class="badge-title">Waste Warrior</h3>
+          <p class="badge-description">Sorted and recycled consistently for a week</p>
+        </div>
+        
+        <div class="badge-card">
+          <div class="badge-icon">🏆</div>
+          <h3 class="badge-title">Climate Champion</h3>
+          <p class="badge-description">Maintained low impact score for 2 weeks straight</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <p class="footer-text">
+          EcoTrack – Hackathon prototype for environmental awareness. Designed to help students connect daily actions to simple, visual carbon scores. All data here is simulated for demonstration.
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ==================== LOGIN LOGIC ====================
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const errorMessage = document.getElementById('error-message');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+      
+      if (!email || !password) {
+        errorMessage.textContent = 'Please enter both email and password to continue.';
+        errorMessage.classList.remove('hidden');
+        loginBtn.classList.add('shake');
+        setTimeout(() => loginBtn.classList.remove('shake'), 300);
+        return;
+      }
+      
+      // Success - show app
+      loginScreen.style.display = 'none';
+      appScreen.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Clear error when typing
+    emailInput.addEventListener('input', () => errorMessage.classList.add('hidden'));
+    passwordInput.addEventListener('input', () => errorMessage.classList.add('hidden'));
+
+    // ==================== SCROLL PROGRESS BAR ====================
+    const scrollProgress = document.getElementById('scroll-progress');
+    
+    window.addEventListener('scroll', function() {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      scrollProgress.style.width = Math.min(100, Math.max(0, progress)) + '%';
+    });
+
+    // ==================== SMOOTH SCROLLING ====================
+    document.querySelectorAll('[data-scroll]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-scroll');
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // ==================== SCORE WIDGET ====================
+    const scoreSlider = document.getElementById('score-slider');
+    const scoreNumber = document.getElementById('score-number');
+    const gaugeCircle = document.getElementById('gauge-circle');
+    const impactBadge = document.getElementById('impact-badge');
+    const impactText = document.getElementById('impact-text');
+
+    function updateScore(score) {
+      scoreNumber.textContent = score;
+      
+      // Update gauge
+      const circumference = 2 * Math.PI * 70;
+      const offset = circumference - (score / 100) * circumference;
+      gaugeCircle.style.strokeDashoffset = offset;
+      
+      // Update color and text
+      let color, label, text;
+      if (score <= 30) {
+        color = '#3fb464';
+        label = 'Low impact';
+        text = 'Great work! Your choices today are helping reduce carbon emissions. Keep up these eco-friendly habits.';
+        impactBadge.style.backgroundColor = 'rgba(63, 180, 100, 0.2)';
+        impactBadge.style.color = '#3fb464';
+      } else if (score <= 70) {
+        color = '#f39c12';
+        label = 'Moderate impact';
+        text = "You're on the right track. Small changes in transport, food, or energy use can make a big difference.";
+        impactBadge.style.backgroundColor = 'rgba(243, 156, 18, 0.2)';
+        impactBadge.style.color = '#f39c12';
+      } else {
+        color = '#e74c3c';
+        label = 'High impact';
+        text = 'This is where changes matter most. Focus on one habit at a time—each shift adds up over weeks.';
+        impactBadge.style.backgroundColor = 'rgba(231, 76, 60, 0.2)';
+        impactBadge.style.color = '#e74c3c';
+      }
+      
+      gaugeCircle.style.stroke = color;
+      impactBadge.textContent = label;
+      impactText.textContent = text;
+    }
+
+    scoreSlider.addEventListener('input', function() {
+      updateScore(parseInt(this.value));
+    });
+
+    // ==================== HABIT CHIPS ====================
+    const habitSelections = {
+      transport: 0,
+      food: 0,
+      energy: 0,
+      waste: 0
+    };
+
+    document.querySelectorAll('.chip-container').forEach(container => {
+      const category = container.getAttribute('data-category');
+      const chips = container.querySelectorAll('.chip');
+      
+      chips.forEach((chip, index) => {
+        chip.addEventListener('click', function() {
+          // Deactivate all chips in this category
+          chips.forEach(c => c.classList.remove('active'));
+          // Activate this chip
+          this.classList.add('active');
+          // Store weight
+          habitSelections[category] = parseInt(this.getAttribute('data-weight'));
+          // Update breakdown
+          updateBreakdown();
+        });
+      });
+    });
+
+    function updateBreakdown() {
+      document.getElementById('breakdown-transport').textContent = habitSelections.transport + '/10';
+      document.getElementById('breakdown-food').textContent = habitSelections.food + '/10';
+      document.getElementById('breakdown-energy').textContent = habitSelections.energy + '/10';
+      document.getElementById('breakdown-waste').textContent = habitSelections.waste + '/10';
+      
+      const total = habitSelections.transport + habitSelections.food + 
+                    habitSelections.energy + habitSelections.waste;
+      document.getElementById('total-badge').textContent = 'Total: ' + total + '/40';
+    }
+
+    // ==================== CALCULATE SCORE ====================
+    document.getElementById('calculate-score').addEventListener('click', function() {
+      const total = habitSelections.transport + habitSelections.food + 
+                    habitSelections.energy + habitSelections.waste;
+      
+      // Normalize to 5-100 range
+      const normalized = Math.min(100, Math.max(5, Math.round((total / 40) * 95 + 5)));
+      
+      scoreSlider.value = normalized;
+      updateScore(normalized);
+      
+      // Update insights with highest impact category
+      updateHighestImpactHint();
+      
+      // Scroll to insights
+      document.getElementById('insights').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // ==================== TRY LOW IMPACT ====================
+    document.getElementById('try-low-impact').addEventListener('click', function() {
+      // Auto-select low impact options
+      const containers = document.querySelectorAll('.chip-container');
+      
+      // Transport: Walk / cycle (last chip)
+      const transportChips = containers[0].querySelectorAll('.chip');
+      transportChips.forEach(c => c.classList.remove('active'));
+      transportChips[transportChips.length - 1].classList.add('active');
+      habitSelections.transport = 1;
+      
+      // Food: Fully plant-based (last chip)
+      const foodChips = containers[1].querySelectorAll('.chip');
+      foodChips.forEach(c => c.classList.remove('active'));
+      foodChips[foodChips.length - 1].classList.add('active');
+      habitSelections.food = 1;
+      
+      // Energy: Fans, lights only (last chip)
+      const energyChips = containers[2].querySelectorAll('.chip');
+      energyChips.forEach(c => c.classList.remove('active'));
+      energyChips[energyChips.length - 1].classList.add('active');
+      habitSelections.energy = 2;
+      
+      // Waste: Regularly sort & recycle (last chip)
+      const wasteChips = containers[3].querySelectorAll('.chip');
+      wasteChips.forEach(c => c.classList.remove('active'));
+      wasteChips[wasteChips.length - 1].classList.add('active');
+      habitSelections.waste = 2;
+      
+      updateBreakdown();
+      
+      // Calculate and update score
+      const total = 6; // 1+1+2+2
+      const normalized = Math.min(100, Math.max(5, Math.round((total / 40) * 95 + 5)));
+      scoreSlider.value = normalized;
+      updateScore(normalized);
+      
+      // Scroll to daily actions
+      setTimeout(() => {
+        document.getElementById('daily-actions').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    });
+
+    // ==================== INSIGHTS DATA ====================
+    const insightSets = [
+      {
+        focus: 'transport',
+        points: [
+          'Solo car trips add up fast—even short ones create more emissions than you\'d think.',
+          'Walking, cycling, or taking public transit significantly reduces your carbon footprint.',
+          'Try replacing just two car trips this week with walking or the bus to see the difference.'
+        ],
+        scenario: 'If you replaced two short solo car trips this week with walking or cycling, your demo score could move closer to the "low impact" band. Small changes add up over the semester.'
+      },
+      {
+        focus: 'food',
+        points: [
+          'Animal products—especially red meat—require far more resources and create higher emissions than plant-based foods.',
+          'You don\'t have to go fully vegetarian. Even one plant-based meal a day makes a measurable impact.',
+          'Trying "Meatless Mondays" or choosing veg options at lunch can shift your score significantly.'
+        ],
+        scenario: 'If you swapped just one meat-heavy meal per day for a plant-based option this week, you could reduce your food-related carbon impact by up to 30%.'
+      },
+      {
+        focus: 'home energy',
+        points: [
+          'Air conditioning uses far more energy than fans or natural ventilation—especially when left running all day.',
+          'Turning off AC when you\'re not home or at night can cut home energy emissions in half.',
+          'Simple habits like unplugging devices and using LED bulbs also help reduce overall energy use.'
+        ],
+        scenario: 'If you reduced AC use by half—say, turning it off at night or when you\'re out—you could drop your home energy impact by 40% or more.'
+      },
+      {
+        focus: 'waste',
+        points: [
+          'Throwing everything in one bin means recyclable materials end up in landfills, releasing methane as they decompose.',
+          'Sorting waste into recyclables, compost, and trash drastically reduces what goes to landfills.',
+          'Start with one change: separate plastic and paper. Even small efforts add up when done consistently.'
+        ],
+        scenario: 'If you regularly sorted your waste and recycled properly, you\'d prevent hundreds of pounds of material from reaching landfills each year.'
+      }
+    ];
+
+    let currentInsightIndex = 0;
+
+    function updateInsights(index) {
+      const insight = insightSets[index];
+      
+      document.getElementById('focus-area').textContent = 'Focus: ' + insight.focus;
+      
+      const pointsList = document.getElementById('insight-points');
+      pointsList.innerHTML = '';
+      insight.points.forEach(point => {
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="insight-bullet">•</span><span>' + point + '</span>';
+        pointsList.appendChild(li);
+      });
+      
+      document.getElementById('scenario-text').textContent = insight.scenario;
+    }
+
+    document.getElementById('shuffle-insights').addEventListener('click', function() {
+      currentInsightIndex = (currentInsightIndex + 1) % insightSets.length;
+      updateInsights(currentInsightIndex);
+    });
+
+    function updateHighestImpactHint() {
+      const max = Math.max(
+        habitSelections.transport,
+        habitSelections.food,
+        habitSelections.energy,
+        habitSelections.waste
+      );
+      
+      if (max === 0) return;
+      
+      let category = 'transport';
+      if (habitSelections.food === max) category = 'food';
+      else if (habitSelections.energy === max) category = 'home energy';
+      else if (habitSelections.waste === max) category = 'waste';
+      
+      const hint = document.getElementById('highest-impact-hint');
+      const text = document.getElementById('highest-impact-text');
+      text.innerHTML = '💡 Based on your selections, focusing on <strong>' + category + 
+                       '</strong> would give you the biggest impact reduction.';
+      hint.style.display = 'block';
+    }
+
+    // Initialize
+    updateScore(45);
+  </script>
+
+</body>
+</html>
